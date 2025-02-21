@@ -122,10 +122,16 @@ namespace SetUpForDebug
 
                 var proj = new Microsoft.Build.Evaluation.Project(projPath);
 
+                // Create virtual direcoty (if needed)
+
+                // Set the start URL to virtual directory with debug.auburn.edu (add no start url feature/setting?)
+
+                // Add debug binding in applcationhost file
+
+
                 string message = $"Setting up for Debug..... doc is {activeDoc.Name}";
                 string title = "Command";
 
-                // test save
                 // Show a message box to prove we were here
                 VsShellUtilities.ShowMessageBox(
                     this.package,
