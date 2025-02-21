@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using EnvDTE80;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
@@ -6,6 +7,15 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
+using System.IO;
+using EnvDTE;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Locator;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml.Linq;
+using Project = Microsoft.Build.Evaluation.Project;
+using System.Text.RegularExpressions;
 
 namespace SetUpForDebug
 {
@@ -86,20 +96,48 @@ namespace SetUpForDebug
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        private void Execute(object sender, EventArgs e)
+        private async void Execute(object sender, EventArgs e)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            string message = "Setting up for Debug.....";
-            string title = "Command";
 
-            // Show a message box to prove we were here
-            VsShellUtilities.ShowMessageBox(
-                this.package,
-                message,
-                title,
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            try
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+                var dte = await ServiceProvider.GetServiceAsync(typeof(DTE)) as DTE2;
+                if (dte == null)
+                {
+                    return;
+                }
+
+                var activeDoc = dte.ActiveDocument;
+                if (activeDoc == null || !activeDoc.Name.EndsWith(".csproj"))
+                {
+                    System.Windows.Forms.MessageBox.Show("Please run in the project properties");
+                    return;
+                }
+
+                var projPath = activeDoc.FullName;
+                var projDirectory = Path.GetDirectoryName(projPath);
+                var solutionPath = dte.Solution.FullName;
+
+                var proj = new Microsoft.Build.Evaluation.Project(projPath);
+
+                string message = $"Setting up for Debug..... doc is {activeDoc.Name}";
+                string title = "Command";
+
+                // test save
+                // Show a message box to prove we were here
+                VsShellUtilities.ShowMessageBox(
+                    this.package,
+                    message,
+                    title,
+                    OLEMSGICON.OLEMSGICON_INFO,
+                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);}
+            catch
+            {
+
+            }
         }
     }
 }
