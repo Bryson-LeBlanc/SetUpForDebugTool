@@ -140,9 +140,9 @@ namespace SetUpForDebug
                     OLEMSGICON.OLEMSGICON_INFO,
                     OLEMSGBUTTON.OLEMSGBUTTON_OK,
                     OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);}
-            catch
+            catch (Exception ex)
             {
-
+                System.Windows.Forms.MessageBox.Show(ex.Message);
             }
         }
     }
