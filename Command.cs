@@ -145,5 +145,55 @@ namespace SetUpForDebug
                 System.Windows.Forms.MessageBox.Show(ex.Message);
             }
         }
+
+        // start url should be: http://localhost:8080/whatver-the-project-is with "local host" as "debug.auburn.edu"
+        private void SetStartUrl(Microsoft.Build.Evaluation.Project proj, string startUrl)
+        {
+            // Load the .csproj file
+            string projectFilePath = proj.FullPath;
+            XDocument projectFile = XDocument.Load(projectFilePath);
+
+            // Query the XML to find the ProjectUrl element
+            var projectUrlElement = projectFile.Descendants("ProjectUrl").FirstOrDefault();
+            if (projectUrlElement != null)
+            {
+                string projectUrlValue = projectUrlElement.Value;
+                System.Diagnostics.Debug.WriteLine($"ProjectUrl: {projectUrlValue}");
+            }
+
+            var allProps = proj.Properties.ToList();
+
+            // Fetch the ProjectUrl property value
+            var projectUrlProperty = proj.Properties.FirstOrDefault(p => p.Name == "ProjectUrl");
+            if (projectUrlProperty != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"ProjectUrl: {projectUrlProperty.EvaluatedValue}");
+            }
+
+            var startUrlProperty = proj.Properties.FirstOrDefault(p => p.Name == "Start URL");
+            var projURLDir = proj.Properties.FirstOrDefault(p => p.Name == "Project Url");
+            if (startUrlProperty == null)
+            {
+                proj.SetProperty("StartUrl", startUrl);
+            }
+            else
+            {
+                startUrlProperty.UnevaluatedValue = startUrl;
+            }
+        }
+
+        //private void AddDebugBinding(string solutionPath, string projDirectory)
+        //{
+        //    var solutionDirectory = Path.GetDirectoryName(solutionPath);
+        //    var applicationHostPath = Path.Combine(solutionDirectory, ".vs", "config", "applicationhost.config");
+        //    var applicationHost = XDocument.Load(applicationHostPath);
+        //    var site = applicationHost.Descendants("site").FirstOrDefault();
+        //    var bindings = site.Descendants("bindings").FirstOrDefault();
+        //    var binding = new XElement("binding");
+        //    binding.SetAttributeValue("protocol", "http");
+        //    binding.SetAttributeValue("bindingInformation", "*:80:debug.auburn.edu");
+        //    bindings.Add(binding);
+        //    applicationHost.Save(applicationHostPath);
+        //}
     }
 }
