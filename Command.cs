@@ -10,7 +10,7 @@ using Task = System.Threading.Tasks.Task;
 using System.IO;
 using EnvDTE;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Locator;
+//using Microsoft.Build.Locator;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -120,11 +120,13 @@ namespace SetUpForDebug
                 var projDirectory = Path.GetDirectoryName(projPath);
                 var solutionPath = dte.Solution.FullName;
 
-                var proj = new Microsoft.Build.Evaluation.Project(projPath);
+                var proj = new Project(projPath);
+                string updatedUrl = GenerateDebugUrl(projPath);
 
                 // Create virtual direcoty (if needed)
 
                 // Set the start URL to virtual directory with debug.auburn.edu (add no start url feature/setting?)
+                SetStartUrl(proj, updatedUrl);
 
                 // Add debug binding in applcationhost file
 
@@ -146,40 +148,23 @@ namespace SetUpForDebug
             }
         }
 
+        // takes project url (local host) and makes the debug url (that will be the start url)
+        private string GenerateDebugUrl(string projPath)
+        {
+            var code = XDocument.Load(projPath);
+            var whatisns = code.Root.GetDefaultNamespace();
+            var found = code.Descendants(whatisns + "IISUrl").Select(de => de.Value);
+            string iisUrlInnerHtml = string.Join(Environment.NewLine, found);
+            return Regex.Replace(iisUrlInnerHtml, @"http://localhost", "http://debug.auburn.edu");
+        }
+
         // start url should be: http://localhost:8080/whatver-the-project-is with "local host" as "debug.auburn.edu"
-        private void SetStartUrl(Microsoft.Build.Evaluation.Project proj, string startUrl)
+        private void SetStartUrl(Project proj, string startUrl)
         {
             // Load the .csproj file
             string projectFilePath = proj.FullPath;
             XDocument projectFile = XDocument.Load(projectFilePath);
 
-            // Query the XML to find the ProjectUrl element
-            var projectUrlElement = projectFile.Descendants("ProjectUrl").FirstOrDefault();
-            if (projectUrlElement != null)
-            {
-                string projectUrlValue = projectUrlElement.Value;
-                System.Diagnostics.Debug.WriteLine($"ProjectUrl: {projectUrlValue}");
-            }
-
-            var allProps = proj.Properties.ToList();
-
-            // Fetch the ProjectUrl property value
-            var projectUrlProperty = proj.Properties.FirstOrDefault(p => p.Name == "ProjectUrl");
-            if (projectUrlProperty != null)
-            {
-                System.Diagnostics.Debug.WriteLine($"ProjectUrl: {projectUrlProperty.EvaluatedValue}");
-            }
-
-            var startUrlProperty = proj.Properties.FirstOrDefault(p => p.Name == "Start URL");
-            var projURLDir = proj.Properties.FirstOrDefault(p => p.Name == "Project Url");
-            if (startUrlProperty == null)
-            {
-                proj.SetProperty("StartUrl", startUrl);
-            }
-            else
-            {
-                startUrlProperty.UnevaluatedValue = startUrl;
-            }
         }
 
         //private void AddDebugBinding(string solutionPath, string projDirectory)
