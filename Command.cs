@@ -126,7 +126,7 @@ namespace SetUpForDebug
                 // Create virtual direcoty (if needed)
 
                 // Set the start URL to virtual directory with debug.auburn.edu (add no start url feature/setting?)
-                SetStartUrl(proj, updatedUrl);
+                SetStartUrl(proj, updatedUrl, projPath);
 
                 // Add debug binding in applcationhost file
 
@@ -159,11 +159,13 @@ namespace SetUpForDebug
         }
 
         // start url should be: http://localhost:8080/whatver-the-project-is with "local host" as "debug.auburn.edu"
-        private void SetStartUrl(Project proj, string startUrl)
+        private void SetStartUrl(Project proj, string startUrl, string projPath)
         {
             // Load the .csproj file
-            string projectFilePath = proj.FullPath;
-            XDocument projectFile = XDocument.Load(projectFilePath);
+            var code = XDocument.Load(projPath);
+            XDocument userFile = XDocument.Load(projPath + ".user");
+
+            var projElement = userFile.Element("Project");
 
         }
 
