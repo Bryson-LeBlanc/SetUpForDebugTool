@@ -165,7 +165,28 @@ namespace SetUpForDebug
             var code = XDocument.Load(projPath);
             XDocument userFile = XDocument.Load(projPath + ".user");
 
-            var projElement = userFile.Element("Project");
+            XElement projExtension = new XElement("ProjectExtensions",
+                new XElement("VisualStudio",
+                    new XElement("FlavorProperties", new XAttribute("GUID", "placeholder"),
+                        new XElement("WebProjectProperties",
+                            new XElement("StartPageUrl"),
+                            new XElement("StartAction", "URL"),
+                            new XElement("AspNetDebugging", "True"),
+                            new XElement("SilverlightDebugging", "False"),
+                            new XElement("NativeDebugging", "False"),
+                            new XElement("SQLDebugging", "False"),
+                            new XElement("ExternalProgram"),
+                            new XElement("StartExternalURL", startUrl),
+                            new XElement("StartCmdLineArguments"),
+                            new XElement("StartWorkingDirectory"),
+                            new XElement("EnableENC", "True"),
+                            new XElement("AlwaysStartWebServerOnDebug", "False")
+                        )
+
+                    )
+                )
+            );
+            Console.WriteLine("done");
 
         }
 
