@@ -122,11 +122,12 @@ namespace SetUpForDebug
 
                 var proj = new Project(projPath);
                 string updatedUrl = GenerateDebugUrl(projPath);
+                string guid = GenerateGuid(projPath);
 
                 // Create virtual direcoty (if needed)
 
                 // Set the start URL to virtual directory with debug.auburn.edu (add no start url feature/setting?)
-                SetStartUrl(proj, updatedUrl, projPath);
+                SetStartUrl(proj, updatedUrl, projPath, guid);
 
                 // Add debug binding in applcationhost file
 
@@ -154,12 +155,24 @@ namespace SetUpForDebug
             var code = XDocument.Load(projPath);
             var whatisns = code.Root.GetDefaultNamespace();
             var found = code.Descendants(whatisns + "IISUrl").Select(de => de.Value);
+            var GUID = code.Descendants(whatisns + "FlavorProperties").Select(de => de.Attribute("GUID")?.Value);
             string iisUrlInnerHtml = string.Join(Environment.NewLine, found);
+            string g = string.Join(Environment.NewLine, GUID);
             return Regex.Replace(iisUrlInnerHtml, @"http://localhost", "http://debug.auburn.edu");
         }
 
+        // takes project url (local host) and makes the guid
+        private string GenerateGuid(string projPath)
+        {
+            var code = XDocument.Load(projPath);
+            var whatisns = code.Root.GetDefaultNamespace();
+            var GUID = code.Descendants(whatisns + "FlavorProperties").Select(de => de.Attribute("GUID")?.Value);
+            string g = string.Join(Environment.NewLine, GUID);
+            return g;
+        }
+
         // start url should be: http://localhost:8080/whatver-the-project-is with "local host" as "debug.auburn.edu"
-        private void SetStartUrl(Project proj, string startUrl, string projPath)
+        private void SetStartUrl(Project proj, string startUrl, string projPath, string guid)
         {
             // Load the .csproj file
             var code = XDocument.Load(projPath);
@@ -167,7 +180,7 @@ namespace SetUpForDebug
 
             XElement projExtension = new XElement("ProjectExtensions",
                 new XElement("VisualStudio",
-                    new XElement("FlavorProperties", new XAttribute("GUID", "placeholder"),
+                    new XElement("FlavorProperties", new XAttribute("GUID", guid),
                         new XElement("WebProjectProperties",
                             new XElement("StartPageUrl"),
                             new XElement("StartAction", "URL"),
