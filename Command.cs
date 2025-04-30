@@ -178,32 +178,31 @@ namespace SetUpForDebug
             XDocument code = XDocument.Load(projPath);
             XDocument userFile = XDocument.Load(projPath + ".user");
 
-            XElement projExtension = new XElement("ProjectExtensions",
-                new XElement("VisualStudio",
-                    new XElement("FlavorProperties", new XAttribute("GUID", guid),
-                        new XElement("WebProjectProperties",
-                            new XElement("StartPageUrl"),
-                            new XElement("StartAction", "URL"),
-                            new XElement("AspNetDebugging", "True"),
-                            new XElement("SilverlightDebugging", "False"),
-                            new XElement("NativeDebugging", "False"),
-                            new XElement("SQLDebugging", "False"),
-                            new XElement("ExternalProgram"),
-                            new XElement("StartExternalURL", startUrl),
-                            new XElement("StartCmdLineArguments"),
-                            new XElement("StartWorkingDirectory"),
-                            new XElement("EnableENC", "True"),
-                            new XElement("AlwaysStartWebServerOnDebug", "False")
+            XNamespace ns = code.Root.GetDefaultNamespace(); // Get the default namespace from the project file
+            XElement projExtension = new XElement(ns + "ProjectExtensions",
+                new XElement(ns + "VisualStudio",
+                    new XElement(ns + "FlavorProperties", new XAttribute("GUID", guid),
+                        new XElement(ns + "WebProjectProperties",
+                            new XElement(ns + "StartPageUrl"),
+                            new XElement(ns + "StartAction", "URL"),
+                            new XElement(ns + "AspNetDebugging", "True"),
+                            new XElement(ns + "SilverlightDebugging", "False"),
+                            new XElement(ns + "NativeDebugging", "False"),
+                            new XElement(ns + "SQLDebugging", "False"),
+                            new XElement(ns + "ExternalProgram"),
+                            new XElement(ns + "StartExternalURL", startUrl),
+                            new XElement(ns + "StartCmdLineArguments"),
+                            new XElement(ns + "StartWorkingDirectory"),
+                            new XElement(ns + "EnableENC", "True"),
+                            new XElement(ns + "AlwaysStartWebServerOnDebug", "False")
                         )
-
                     )
                 )
             );
 
             userFile.Root.Add(projExtension);
-            userFile.Save(projPath + ".user");
+            userFile.Save(projPath);
 
-            Console.WriteLine("done");
 
         }
 
