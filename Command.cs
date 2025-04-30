@@ -175,7 +175,7 @@ namespace SetUpForDebug
         private void SetStartUrl(Project proj, string startUrl, string projPath, string guid)
         {
             // Load the .csproj file
-            var code = XDocument.Load(projPath);
+            XDocument code = XDocument.Load(projPath);
             XDocument userFile = XDocument.Load(projPath + ".user");
 
             XElement projExtension = new XElement("ProjectExtensions",
@@ -199,6 +199,10 @@ namespace SetUpForDebug
                     )
                 )
             );
+
+            userFile.Root.Add(projExtension);
+            userFile.Save(projPath + ".user");
+
             Console.WriteLine("done");
 
         }
